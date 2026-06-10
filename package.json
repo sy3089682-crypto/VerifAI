@@ -1,0 +1,49 @@
+{
+  "name": "verifai",
+  "version": "0.1.0",
+  "description": "Open-source AI output verification. Record, audit, and enforce trust in AI-generated code.",
+  "bin": {
+    "verifai": "./src/cli/index.js"
+  },
+  "main": "./src/index.js",
+  "type": "module",
+  "files": ["src", "LICENSE", "README.md"],
+  "scripts": {
+    "test": "node --experimental-test-coverage --test tests/*.test.js",
+    "test:watch": "node --test --watch tests/*.test.js",
+    "lint": "eslint src/ tests/",
+    "format": "prettier --write src/ tests/",
+    "prepublishOnly": "npm test"
+  },
+  "keywords": [
+    "ai",
+    "verification",
+    "audit",
+    "trust",
+    "code-review",
+    "ai-safety",
+    "developer-tools"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "commander": "^12.0.0",
+    "chalk": "^5.3.0",
+    "better-sqlite3": "^11.0.0"
+  },
+  "devDependencies": {
+    "eslint": "^9.0.0",
+    "prettier": "^3.2.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sy3089682-crypto/VerifAI.git"
+  },
+  "bugs": {
+    "url": "https://github.com/sy3089682-crypto/VerifAI/issues"
+  },
+  "homepage": "https://github.com/sy3089682-crypto/VerifAI",
+  "funding": "https://github.com/sponsors/sy3089682-crypto"
+}
