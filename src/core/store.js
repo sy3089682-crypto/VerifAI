@@ -1,11 +1,17 @@
-import { existsSync, mkdirSync, readFileSync, writeFileSync, statSync } from 'fs';
-import { join, dirname } from 'path';
-import { fileURLToPath } from 'url';
+import {
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  writeFileSync,
+  statSync,
+} from "fs";
+import { join, dirname } from "path";
+import { fileURLToPath } from "url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 function getDbPath() {
-  return join(process.cwd(), '.verifai', 'decisions.jsonl');
+  return join(process.cwd(), ".verifai", "decisions.jsonl");
 }
 
 function ensureDir() {
@@ -17,39 +23,44 @@ function ensureDir() {
 
 export function appendRecord(record) {
   ensureDir();
-  const line = JSON.stringify(record) + '\n';
-  writeFileSync(getDbPath(), line, { flag: 'a' });
+  const line = JSON.stringify(record) + "\n";
+  writeFileSync(getDbPath(), line, { flag: "a" });
 }
 
 export function getDecisions(filters = {}) {
   const dbPath = getDbPath();
   if (!existsSync(dbPath)) return [];
 
-  const lines = readFileSync(dbPath, 'utf-8')
-    .split('\n')
+  const lines = readFileSync(dbPath, "utf-8").split("\n").filter(Boolean);
+
+  let decisions = lines
+    .map((l, i) => {
+      try {
+        return JSON.parse(l);
+      } catch {
+        return null;
+      }
+    })
     .filter(Boolean);
 
-  let decisions = lines.map((l, i) => {
-    try { return JSON.parse(l); }
-    catch { return null; }
-  }).filter(Boolean);
-
   if (filters.model) {
-    decisions = decisions.filter(d =>
-      d.model.toLowerCase().includes(filters.model.toLowerCase())
+    decisions = decisions.filter((d) =>
+      d.model.toLowerCase().includes(filters.model.toLowerCase()),
     );
   }
 
   if (filters.tag) {
-    decisions = decisions.filter(d =>
-      d.tags && d.tags.some(t => t.toLowerCase() === filters.tag.toLowerCase())
+    decisions = decisions.filter(
+      (d) =>
+        d.tags &&
+        d.tags.some((t) => t.toLowerCase() === filters.tag.toLowerCase()),
     );
   }
 
   if (filters.since) {
     const cutoff = Date.now() - parseTime(filters.since);
-    decisions = decisions.filter(d =>
-      new Date(d.timestamp).getTime() > cutoff
+    decisions = decisions.filter(
+      (d) => new Date(d.timestamp).getTime() > cutoff,
     );
   }
 
@@ -62,19 +73,18 @@ export function getDecisions(filters = {}) {
 export function getStatus() {
   const dbPath = getDbPath();
   if (!existsSync(dbPath)) {
-    return { recordCount: 0, storageSize: '0 B', oldestRecord: 'N/A' };
+    return { recordCount: 0, storageSize: "0 B", oldestRecord: "N/A" };
   }
 
-  const lines = readFileSync(dbPath, 'utf-8').split('\n').filter(Boolean);
+  const lines = readFileSync(dbPath, "utf-8").split("\n").filter(Boolean);
   const stats = statSync(dbPath);
   const sizeKB = (stats.size / 1024).toFixed(1);
-  const oldest = lines.length > 0
-    ? JSON.parse(lines[0]).timestamp || 'N/A'
-    : 'N/A';
+  const oldest =
+    lines.length > 0 ? JSON.parse(lines[0]).timestamp || "N/A" : "N/A";
 
   return {
     recordCount: lines.length,
-    storageSize: sizeKB + ' KB',
+    storageSize: sizeKB + " KB",
     oldestRecord: oldest,
   };
 }
@@ -84,10 +94,15 @@ function parseTime(str) {
   if (!match) return 86400000;
   const val = parseInt(match[1]);
   switch (match[2]) {
-    case 'd': return val * 86400000;
-    case 'h': return val * 3600000;
-    case 'w': return val * 604800000;
-    case 'm': return val * 2592000000;
-    default: return 86400000;
+    case "d":
+      return val * 86400000;
+    case "h":
+      return val * 3600000;
+    case "w":
+      return val * 604800000;
+    case "m":
+      return val * 2592000000;
+    default:
+      return 86400000;
   }
 }
